@@ -4,23 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Closet Portal</title>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poor+Story&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
-      --bg: #fff6f8;
-      --bg-2: #ffeef3;
-      --surface: rgba(255, 255, 255, 0.88);
-      --surface-strong: #ffffff;
-      --surface-soft: #fff9fb;
-      --text: #4d3441;
-      --text-2: #856370;
-      --border: rgba(167, 122, 139, 0.18);
-      --accent: #f08cab;
-      --accent-2: #c96a8f;
-      --accent-3: #ffd6e2;
-      --shadow: 0 18px 40px rgba(183, 119, 143, 0.14);
-      --shadow-soft: 0 10px 24px rgba(183, 119, 143, 0.1);
+      --bg: #f4e7db;
+      --bg-2: #ead6c5;
+      --surface: rgba(255, 248, 241, 0.9);
+      --surface-strong: #fffaf5;
+      --surface-soft: #f8eee6;
+      --text: #4c1f1a;
+      --text-2: #7c4a44;
+      --border: rgba(124, 74, 68, 0.18);
+      --accent: #7d1818;
+      --accent-2: #a62b2a;
+      --accent-3: #f3d5c8;
+      --shadow: 0 18px 40px rgba(109, 45, 38, 0.15);
+      --shadow-soft: 0 10px 24px rgba(109, 45, 38, 0.1);
       --radius-lg: 24px;
       --radius-md: 18px;
       --radius-sm: 12px;
@@ -37,13 +40,18 @@
     }
 
     body {
-      font-family: 'Poor Story', 'Comic Sans MS', cursive;
+      font-family: 'Inter', sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(255, 214, 229, 0.92), transparent 32%),
-        radial-gradient(circle at top right, rgba(255, 239, 245, 0.98), transparent 28%),
-        linear-gradient(180deg, #fffafc 0%, #fff4f7 45%, #fff8fb 100%);
+        radial-gradient(circle at top left, rgba(245, 227, 211, 0.88), transparent 30%),
+        radial-gradient(circle at top right, rgba(215, 182, 162, 0.5), transparent 26%),
+        linear-gradient(180deg, #f7ecdf 0%, #efe0d2 44%, #f8efe6 100%);
       overflow-x: hidden;
+    }
+
+    h1, h2, h3, .logo-title, .modal-title, .stage-title, .legend-title, .builder-head h2, .stats-title {
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.01em;
     }
 
     button, input, select {
@@ -77,7 +85,7 @@
       padding: 16px 18px;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.82);
+      background: rgba(255, 248, 241, 0.86);
       backdrop-filter: blur(14px);
     }
 
@@ -90,9 +98,9 @@
 
     .logo-title {
       font-size: 26px;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.03em;
       font-weight: 700;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .logo-sub {
@@ -120,8 +128,8 @@
     .nav-tab:hover,
     .nav-tab.active {
       background: var(--accent-3);
-      color: var(--accent-2);
-      border-color: rgba(201, 106, 143, 0.14);
+      color: var(--accent);
+      border-color: rgba(125, 24, 24, 0.14);
       transform: translateY(-1px);
     }
 
@@ -144,10 +152,10 @@
 
     .btn-add,
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      background: linear-gradient(135deg, #8c1d1d 0%, var(--accent-2) 100%);
       color: white;
       padding: 11px 16px;
-      box-shadow: 0 10px 20px rgba(240, 140, 171, 0.28);
+      box-shadow: 0 10px 20px rgba(125, 24, 24, 0.22);
     }
 
     .btn-add:hover,
@@ -161,7 +169,7 @@
 
     .btn-secondary {
       background: var(--surface-strong);
-      color: var(--accent-2);
+      color: var(--accent);
       border: 1px solid var(--border);
       padding: 10px 14px;
     }
@@ -182,8 +190,8 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       background:
-        linear-gradient(135deg, rgba(255, 245, 248, 0.9), rgba(255, 227, 236, 0.84)),
-        rgba(255, 255, 255, 0.7);
+        linear-gradient(135deg, rgba(245, 228, 214, 0.92), rgba(233, 208, 188, 0.85)),
+        rgba(255, 255, 255, 0.72);
     }
 
     .hero-copy {
@@ -197,13 +205,13 @@
       text-transform: uppercase;
       letter-spacing: 0.18em;
       font-size: 12px;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .hero h1 {
       font-size: clamp(28px, 3vw, 46px);
       line-height: 0.96;
-      color: #6f4259;
+      color: #7d1818;
     }
 
     .hero p {
@@ -233,6 +241,20 @@
       overflow: auto;
     }
 
+    .sidebar-handle {
+      display: none;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--accent);
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
     .sidebar-section {
       background: rgba(255, 255, 255, 0.76);
       border: 1px solid var(--border);
@@ -244,7 +266,7 @@
       font-size: 13px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--accent-2);
+      color: var(--accent);
       margin-bottom: 10px;
     }
 
@@ -267,7 +289,7 @@
     .cat-item:hover,
     .cat-item.active {
       background: var(--accent-3);
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .cat-item-left {
@@ -290,7 +312,7 @@
 
     .cat-item.active .cat-count {
       background: white;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .content {
@@ -360,8 +382,8 @@
 
     .filter-chip.active {
       background: var(--accent-3);
-      color: var(--accent-2);
-      border-color: rgba(201, 106, 143, 0.18);
+      color: var(--accent);
+      border-color: rgba(125, 24, 24, 0.18);
     }
 
     .clothes-grid {
@@ -389,12 +411,12 @@
     .cloth-card:hover {
       transform: translateY(-4px);
       box-shadow: var(--shadow);
-      border-color: rgba(240, 140, 171, 0.38);
+      border-color: rgba(125, 24, 24, 0.38);
     }
 
     .cloth-card.selected {
-      border-color: rgba(240, 140, 171, 0.72);
-      box-shadow: 0 0 0 2px rgba(240, 140, 171, 0.12), var(--shadow);
+      border-color: rgba(125, 24, 24, 0.72);
+      box-shadow: 0 0 0 2px rgba(125, 24, 24, 0.12), var(--shadow);
     }
 
     .cloth-media,
@@ -426,7 +448,7 @@
       justify-content: center;
       background:
         radial-gradient(circle at 30% 30%, rgba(255,255,255,0.92), transparent 42%),
-        linear-gradient(135deg, rgba(240, 140, 171, 0.16), rgba(255, 214, 229, 0.46));
+        linear-gradient(135deg, rgba(243, 213, 200, 0.18), rgba(234, 214, 197, 0.5));
     }
 
     .fallback-emoji {
@@ -443,8 +465,8 @@
       font-size: 12px;
       text-transform: capitalize;
       background: rgba(255, 255, 255, 0.92);
-      color: var(--accent-2);
-      border: 1px solid rgba(201, 106, 143, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(125, 24, 24, 0.12);
       backdrop-filter: blur(8px);
     }
 
@@ -469,6 +491,25 @@
       font-size: 15px;
     }
 
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(243, 213, 200, 0.85);
+      border: 1px solid rgba(125, 24, 24, 0.12);
+      color: var(--accent);
+      font-size: 12px;
+      line-height: 1;
+    }
+
     .color-dot {
       width: 12px;
       height: 12px;
@@ -490,20 +531,20 @@
       background: rgba(255,255,255,0.95);
       border-radius: 999px;
       padding: 10px 12px;
-      color: var(--accent-2);
+      color: var(--accent);
       cursor: pointer;
     }
 
     .action-btn-danger {
-      color: #9f4c67;
+      color: #8c1d1d;
     }
 
     .empty-state {
       grid-column: 1 / -1;
       min-height: 340px;
-      border: 2px dashed rgba(201, 106, 143, 0.18);
+      border: 2px dashed rgba(125, 24, 24, 0.18);
       border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 248, 241, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -520,7 +561,7 @@
 
     .empty-card h2 {
       font-size: 34px;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .empty-card p {
@@ -557,7 +598,7 @@
     .stage-title,
     .stats-title {
       font-size: 28px;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .builder-head p {
@@ -593,7 +634,7 @@
 
     .pair-form-title h3 {
       font-size: 24px;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .pair-form-title p {
@@ -664,7 +705,7 @@
     }
 
     .stage-item-img {
-      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255, 227, 236, 0.9));
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(243, 213, 200, 0.9));
     }
 
     .stage-item-name {
@@ -709,13 +750,13 @@
       height: 10px;
       border-radius: 999px;
       overflow: hidden;
-      background: #ffe2eb;
+      background: #ecd5cb;
     }
 
     .score-fill {
       height: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #f3a5bc, #d46a90);
+      background: linear-gradient(90deg, #c85c4e, #7d1818);
       transition: width 0.3s ease;
     }
 
@@ -736,9 +777,9 @@
     .vtag {
       padding: 5px 9px;
       border-radius: 999px;
-      background: rgba(255, 230, 238, 0.9);
-      border: 1px solid rgba(201, 106, 143, 0.12);
-      color: var(--accent-2);
+      background: rgba(243, 213, 200, 0.9);
+      border: 1px solid rgba(125, 24, 24, 0.12);
+      color: var(--accent);
       font-size: 14px;
     }
 
@@ -765,7 +806,7 @@
     .stat-value {
       font-size: 34px;
       line-height: 0.95;
-      color: var(--accent-2);
+      color: var(--accent);
     }
 
     .stat-sub {
@@ -790,7 +831,7 @@
 
     .legend-title {
       font-size: 24px;
-      color: var(--accent-2);
+      color: var(--accent);
       margin-bottom: 10px;
     }
 
@@ -844,7 +885,7 @@
 
     .modal-title {
       font-size: 30px;
-      color: var(--accent-2);
+      color: var(--accent);
       margin-bottom: 14px;
     }
 
@@ -872,7 +913,7 @@
     }
 
     .upload-zone {
-      border: 2px dashed rgba(201, 106, 143, 0.2);
+      border: 2px dashed rgba(125, 24, 24, 0.22);
       border-radius: var(--radius-md);
       padding: 22px;
       text-align: center;
@@ -886,8 +927,8 @@
     }
 
     .upload-zone:hover {
-      border-color: rgba(240, 140, 171, 0.55);
-      background: linear-gradient(180deg, #fff9fb, #fff0f5);
+      border-color: rgba(125, 24, 24, 0.5);
+      background: linear-gradient(180deg, #fffaf5, #f5e4d3);
     }
 
     .color-picker-row {
@@ -906,7 +947,7 @@
     }
 
     .color-swatch.active {
-      border-color: var(--accent-2);
+      border-color: var(--accent);
       transform: scale(1.08);
     }
 
@@ -921,6 +962,28 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
+    }
+
+    .tag-input-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tag-suggest {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.35;
+    }
+
+    .tag-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      outline: none;
+      font-size: 16px;
     }
 
     .preview-image {
@@ -948,20 +1011,46 @@
     @media (max-width: 980px) {
       .main {
         flex-direction: column;
+        overflow: visible;
       }
 
       .sidebar {
+        position: static;
         width: 100%;
+        max-height: none;
         border-right: none;
         border-bottom: 1px solid var(--border);
+        border-radius: 0;
         flex-direction: column;
         gap: 12px;
         overflow: visible;
+        z-index: auto;
+        transform: none;
+        transition: none;
+        box-shadow: none;
+        padding-top: 12px;
       }
 
       .sidebar-section {
         min-width: 0;
         width: 100%;
+        display: none;
+      }
+
+      .sidebar-handle {
+        display: flex;
+      }
+
+      body.mobile-filters-open .sidebar-section {
+        display: block;
+      }
+
+      .content {
+        order: 1;
+      }
+
+      .sidebar {
+        order: 2;
       }
 
       .builder-layout {
@@ -972,6 +1061,7 @@
         width: 100%;
         border-top: 1px solid var(--border);
       }
+
     }
 
     @media (max-width: 720px) {
@@ -1080,15 +1170,15 @@
 
     <div class="topnav">
       <div class="logo">
-        <div class="logo-title">MY CLOSET</div>
-        <div class="logo-sub">shop your own wardrobe</div>
+        <div class="logo-title" id="logoTitle">MY CLOSET</div>
+        <div class="logo-sub" id="logoSub">shop your own wardrobe</div>
       </div>
       <div class="nav-tabs">
         <button class="nav-tab active" onclick="switchView('closet', this)"><i class="ti ti-shirt" aria-hidden="true"></i> Closet</button>
-        <button class="nav-tab" onclick="switchView('builder', this)"><i class="ti ti-wand" aria-hidden="true"></i> Pairing Board</button>
         <button class="nav-tab" onclick="switchView('stats', this)"><i class="ti ti-chart-donut" aria-hidden="true"></i> Stats</button>
       </div>
       <div class="nav-actions">
+        <button class="btn-secondary" onclick="openProfileModal()"><i class="ti ti-user" aria-hidden="true"></i> Profile</button>
         <button class="btn-add" onclick="openModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add piece</button>
       </div>
     </div>
@@ -1097,46 +1187,50 @@
       <div class="hero-copy">
         <div class="eyebrow">pookie girlie closet</div>
         <h1>Shop your own clothes like the cutest boutique on the internet</h1>
-        <p>Start with a blank closet, upload your pieces, pair them up, and keep the whole wardrobe feeling dreamy, organized, and easy to browse.</p>
+        <p>Start with a blank closet, upload your pieces, tag them with cute hashtags, and keep the whole wardrobe feeling dreamy, organized, and easy to browse.</p>
       </div>
       <button class="btn-primary" onclick="openModal()">Add your first piece</button>
     </div>
 
     <div class="main">
       <div class="sidebar">
+        <button class="sidebar-handle" type="button" onclick="toggleMobileFilters()">
+          <span><i class="ti ti-filter" aria-hidden="true"></i> Filters, occasions & storage</span>
+          <i class="ti ti-chevron-up" aria-hidden="true"></i>
+        </button>
         <div class="sidebar-section">
           <div class="sidebar-label">Categories</div>
           <button class="cat-item active" onclick="filterCat('all', this)">
             <span class="cat-item-left"><i class="ti ti-layout-grid" aria-hidden="true"></i>All</span>
-            <span class="cat-count" id="cnt-all">0</span>
+            <span class="cat-count" id="cnt-all" data-count="all">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('tops', this)">
             <span class="cat-item-left"><i class="ti ti-shirt" aria-hidden="true"></i>Tops</span>
-            <span class="cat-count" id="cnt-tops">0</span>
+            <span class="cat-count" id="cnt-tops" data-count="tops">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('tshirts', this)">
             <span class="cat-item-left"><i class="ti ti-shirt" aria-hidden="true"></i>T-shirts</span>
-            <span class="cat-count" id="cnt-tshirts">0</span>
+            <span class="cat-count" id="cnt-tshirts" data-count="tshirts">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('pants', this)">
             <span class="cat-item-left"><i class="ti ti-box" aria-hidden="true"></i>Pants</span>
-            <span class="cat-count" id="cnt-pants">0</span>
+            <span class="cat-count" id="cnt-pants" data-count="pants">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('skirts', this)">
             <span class="cat-item-left"><i class="ti ti-stack" aria-hidden="true"></i>Skirts</span>
-            <span class="cat-count" id="cnt-skirts">0</span>
+            <span class="cat-count" id="cnt-skirts" data-count="skirts">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('dresses', this)">
             <span class="cat-item-left"><i class="ti ti-sparkles" aria-hidden="true"></i>Dresses</span>
-            <span class="cat-count" id="cnt-dresses">0</span>
+            <span class="cat-count" id="cnt-dresses" data-count="dresses">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('jumpsuit', this)">
             <span class="cat-item-left"><i class="ti ti-hanger" aria-hidden="true"></i>Jumpsuit</span>
-            <span class="cat-count" id="cnt-jumpsuit">0</span>
+            <span class="cat-count" id="cnt-jumpsuit" data-count="jumpsuit">0</span>
           </button>
           <button class="cat-item" onclick="filterCat('outerwear', this)">
             <span class="cat-item-left"><i class="ti ti-wind" aria-hidden="true"></i>Outerwear</span>
-            <span class="cat-count" id="cnt-outerwear">0</span>
+            <span class="cat-count" id="cnt-outerwear" data-count="outerwear">0</span>
           </button>
         </div>
 
@@ -1144,19 +1238,35 @@
           <div class="sidebar-label">Occasions</div>
           <button class="cat-item" onclick="filterOcc('casual', this)">
             <span class="cat-item-left"><i class="ti ti-sun" aria-hidden="true"></i>Casual</span>
-            <span class="cat-count" id="cnt-occ-casual">0</span>
+            <span class="cat-count" id="cnt-occ-casual" data-count="occ-casual">0</span>
           </button>
           <button class="cat-item" onclick="filterOcc('formal', this)">
             <span class="cat-item-left"><i class="ti ti-briefcase" aria-hidden="true"></i>Formal</span>
-            <span class="cat-count" id="cnt-occ-formal">0</span>
+            <span class="cat-count" id="cnt-occ-formal" data-count="occ-formal">0</span>
           </button>
           <button class="cat-item" onclick="filterOcc('party', this)">
             <span class="cat-item-left"><i class="ti ti-confetti" aria-hidden="true"></i>Party</span>
-            <span class="cat-count" id="cnt-occ-party">0</span>
+            <span class="cat-count" id="cnt-occ-party" data-count="occ-party">0</span>
           </button>
           <button class="cat-item" onclick="filterOcc('work', this)">
             <span class="cat-item-left"><i class="ti ti-building" aria-hidden="true"></i>Work</span>
-            <span class="cat-count" id="cnt-occ-work">0</span>
+            <span class="cat-count" id="cnt-occ-work" data-count="occ-work">0</span>
+          </button>
+          <button class="cat-item" onclick="filterOcc('wedding', this)">
+            <span class="cat-item-left"><i class="ti ti-heart" aria-hidden="true"></i>Wedding</span>
+            <span class="cat-count" id="cnt-occ-wedding" data-count="occ-wedding">0</span>
+          </button>
+          <button class="cat-item" onclick="filterOcc('event-formal', this)">
+            <span class="cat-item-left"><i class="ti ti-certificate" aria-hidden="true"></i>Event formal</span>
+            <span class="cat-count" id="cnt-occ-event-formal" data-count="occ-event-formal">0</span>
+          </button>
+          <button class="cat-item" onclick="filterOcc('shoot-day', this)">
+            <span class="cat-item-left"><i class="ti ti-camera" aria-hidden="true"></i>Shoot day</span>
+            <span class="cat-count" id="cnt-occ-shoot-day" data-count="occ-shoot-day">0</span>
+          </button>
+          <button class="cat-item" onclick="filterOcc('homewreck', this)">
+            <span class="cat-item-left"><i class="ti ti-home" aria-hidden="true"></i>Homewreck</span>
+            <span class="cat-count" id="cnt-occ-homewreck" data-count="occ-homewreck">0</span>
           </button>
         </div>
 
@@ -1164,15 +1274,15 @@
           <div class="sidebar-label">Storage</div>
           <button class="cat-item" onclick="filterLoc('wardrobe', this)">
             <span class="cat-item-left"><i class="ti ti-door" aria-hidden="true"></i>Wardrobe</span>
-            <span class="cat-count" id="cnt-loc-wardrobe">0</span>
+            <span class="cat-count" id="cnt-loc-wardrobe" data-count="loc-wardrobe">0</span>
           </button>
           <button class="cat-item" onclick="filterLoc('suitcase', this)">
             <span class="cat-item-left"><i class="ti ti-luggage" aria-hidden="true"></i>Suitcase</span>
-            <span class="cat-count" id="cnt-loc-suitcase">0</span>
+            <span class="cat-count" id="cnt-loc-suitcase" data-count="loc-suitcase">0</span>
           </button>
           <button class="cat-item" onclick="filterLoc('storage', this)">
             <span class="cat-item-left"><i class="ti ti-box" aria-hidden="true"></i>Storage</span>
-            <span class="cat-count" id="cnt-loc-storage">0</span>
+            <span class="cat-count" id="cnt-loc-storage" data-count="loc-storage">0</span>
           </button>
         </div>
       </div>
@@ -1352,16 +1462,11 @@
 
       <div class="form-grid">
         <div class="form-row">
-          <div class="form-label">Category</div>
-          <select class="form-select" id="newCat">
-            <option value="tops">Tops</option>
-            <option value="tshirts">T-shirts</option>
-            <option value="pants">Pants</option>
-            <option value="skirts">Skirts</option>
-            <option value="dresses">Dresses</option>
-            <option value="jumpsuit">Jumpsuit</option>
-            <option value="outerwear">Outerwear</option>
-          </select>
+          <div class="form-label">Hashtags</div>
+          <div class="tag-input-wrap">
+            <input class="tag-input" type="text" id="newTags" placeholder="e.g. dinnerdate, sundaybrunch, gymwear" />
+            <div class="tag-suggest">Add your own hashtags, separated by commas. Examples: dinnerdate, sundaybrunch, gymwear, hightea, summerfit, haldi, finedine, trekking, run.</div>
+          </div>
         </div>
 
         <div class="form-row">
@@ -1371,6 +1476,10 @@
             <option value="formal">Formal</option>
             <option value="party">Party</option>
             <option value="work">Work</option>
+            <option value="wedding">Wedding</option>
+            <option value="event-formal">Event formal</option>
+            <option value="shoot-day">Shoot day</option>
+            <option value="homewreck">Homewreck</option>
           </select>
         </div>
 
@@ -1406,6 +1515,16 @@
             <button class="color-swatch" style="background:#ece2dc" data-col="#ece2dc" data-name="Oat" onclick="selectColor(this)"></button>
             <button class="color-swatch" style="background:#8f6b56" data-col="#8f6b56" data-name="Mocha" onclick="selectColor(this)"></button>
             <button class="color-swatch" style="background:#5b728c" data-col="#5b728c" data-name="Slate" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#4b2e83" data-col="#4b2e83" data-name="Dark Purple" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#1f4d3a" data-col="#1f4d3a" data-name="Dark Green" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#f7f1e3" data-col="#f7f1e3" data-name="Ivory" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#fff8b5" data-col="#fff8b5" data-name="Light Yellow" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#dcdfe6" data-col="#dcdfe6" data-name="Light Grey" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#8e99a8" data-col="#8e99a8" data-name="Grey" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#5f6f8f" data-col="#5f6f8f" data-name="Blue Grey" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#2e5aac" data-col="#2e5aac" data-name="Royal Blue" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#5f8fdc" data-col="#5f8fdc" data-name="Sky Blue" onclick="selectColor(this)"></button>
+            <button class="color-swatch" style="background:#f7f7f7;border-color:#ddd;background-image:linear-gradient(135deg,#f9c5d1 0%,#f0d24f 25%,#b8e3d0 50%,#b6c9ff 75%,#d6c3ff 100%)" data-col="linear-gradient(135deg, #f9c5d1 0%, #f0d24f 25%, #b8e3d0 50%, #b6c9ff 75%, #d6c3ff 100%)" data-name="Multicolor" onclick="selectColor(this)"></button>
             <button class="color-swatch" style="background:#ffffff;border-color:#ddd" data-col="#ffffff" data-name="White" onclick="selectColor(this)"></button>
           </div>
         </div>
@@ -1418,16 +1537,64 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal">
+      <div class="modal-title">Open your closet</div>
+      <div class="form-row">
+        <div class="form-label">Your name</div>
+        <input class="form-input" type="text" id="profileName" placeholder="e.g. Snigdha" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Your email</div>
+        <input class="form-input" type="email" id="profileEmail" placeholder="e.g. snigdha@email.com" />
+      </div>
+      <div class="form-row">
+        <div class="form-label">Password</div>
+        <input class="form-input" type="password" id="profilePassword" placeholder="Create or enter your password" />
+      </div>
+      <div class="form-row">
+        <div class="tag-suggest">Your closet will sync to Firebase. Use the same email and password anywhere to bring everything back.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeProfileModal()">Not now</button>
+        <button class="btn-secondary" onclick="logoutUser()"><i class="ti ti-logout" aria-hidden="true"></i> Logout</button>
+        <button class="btn-secondary" onclick="loginUser()"><i class="ti ti-login" aria-hidden="true"></i> Log in</button>
+        <button class="btn-primary" onclick="signupUser()"><i class="ti ti-user-plus" aria-hidden="true"></i> Sign up</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = 'closet-portal-items-v2';
-    const OUTFIT_KEY = 'closet-portal-outfit-v2';
+    const firebaseConfig = {
+      // Replace these placeholders with your Firebase web app config.
+      apiKey: 'YOUR_API_KEY',
+      authDomain: 'YOUR_PROJECT.firebaseapp.com',
+      projectId: 'YOUR_PROJECT_ID',
+      storageBucket: 'YOUR_PROJECT_ID.appspot.com',
+      messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+      appId: 'YOUR_APP_ID'
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const { serverTimestamp } = firebase.firestore;
+    const authPersistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+    const LEGACY_PROFILE_KEY = 'closet-portal-profile-v1';
+    const LEGACY_ITEMS_KEY = 'closet-portal-items-v2';
+    const LEGACY_OUTFIT_KEY = 'closet-portal-outfit-v2';
 
     const COLOR_SWATCHES = [
       { col: '#f9c5d1', name: 'Bubblegum' },
       { col: '#000000', name: 'Black' },
       { col: '#1e4f9a', name: 'Blue' },
+      { col: '#5f8fdc', name: 'Sky Blue' },
+      { col: '#2e5aac', name: 'Royal Blue' },
       { col: '#4f8a5b', name: 'Green' },
+      { col: '#1f4d3a', name: 'Dark Green' },
       { col: '#f0d24f', name: 'Yellow' },
+      { col: '#fff8b5', name: 'Light Yellow' },
       { col: '#f18a33', name: 'Orange' },
       { col: '#d84a4a', name: 'Red' },
       { col: '#f08cab', name: 'Rose' },
@@ -1439,10 +1606,15 @@
       { col: '#b6c9ff', name: 'Periwinkle' },
       { col: '#b8e3d0', name: 'Mint' },
       { col: '#d8e7c0', name: 'Sage' },
+      { col: '#4b2e83', name: 'Dark Purple' },
       { col: '#cbb69f', name: 'Mushroom' },
       { col: '#ece2dc', name: 'Oat' },
       { col: '#8f6b56', name: 'Mocha' },
       { col: '#5b728c', name: 'Slate' },
+      { col: '#8e99a8', name: 'Grey' },
+      { col: '#dcdfe6', name: 'Light Grey' },
+      { col: '#f7f1e3', name: 'Ivory' },
+      { col: 'linear-gradient(135deg, #f9c5d1 0%, #f0d24f 25%, #b8e3d0 50%, #b6c9ff 75%, #d6c3ff 100%)', name: 'Multicolor' },
       { col: '#2f3640', name: 'Charcoal' },
       { col: '#ffffff', name: 'White' }
     ];
@@ -1451,7 +1623,11 @@
       casual: '#b8e3d0',
       formal: '#b6c9ff',
       party: '#f9c5d1',
-      work: '#f4e0c1'
+      work: '#f4e0c1',
+      wedding: '#ffd6e2',
+      'event-formal': '#d6c3ff',
+      'shoot-day': '#f7d7b5',
+      homewreck: '#ece2dc'
     };
 
     let currentCat = 'all';
@@ -1462,8 +1638,14 @@
     let selectedColor = COLOR_SWATCHES[0].col;
     let selectedColorName = COLOR_SWATCHES[0].name;
     let uploadedImage = null;
+    let activeProfile = null;
     let items = loadItems();
+    let outfitSlotIds = { top: null, bottom: null, outer: null, extra: null };
     let outfitSlots = { top: null, bottom: null, outer: null, extra: null };
+    let currentUser = null;
+    let unsubscribeCloset = null;
+    let unsubscribeOutfit = null;
+    let isFirestoreSyncing = false;
 
     function escapeHtml(value) {
       return String(value)
@@ -1474,44 +1656,96 @@
         .replaceAll("'", '&#39;');
     }
 
-    function loadItems() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (err) {
-        return [];
+    function parseTags(value) {
+      if (Array.isArray(value)) {
+        return [...new Set(value.map(tag => normalizeTag(tag)).filter(Boolean))];
       }
+      return [...new Set(String(value || '')
+        .split(/[\s,]+/)
+        .map(tag => normalizeTag(tag))
+        .filter(Boolean))];
     }
 
-    function saveItems() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      } catch (err) {}
+    function normalizeTag(tag) {
+      return String(tag || '')
+        .replace(/^#+/, '')
+        .replace(/[^a-z0-9_-]/gi, '')
+        .toLowerCase();
     }
+
+    function displayColor(color) {
+      return color || '#f08cab';
+    }
+
+    function colorTint(color, alpha = '22') {
+      if (!color) return `#f08cab${alpha}`;
+      if (String(color).startsWith('#')) {
+        return `${color}${alpha}`;
+      }
+      return color;
+    }
+
+    function occasionLabel(occ) {
+      return String(occ || '')
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, ch => ch.toUpperCase());
+    }
+
+    function newestFirst(a, b) {
+      return Number(b.id) - Number(a.id);
+    }
+
+    function normalizeEmail(email) {
+      return String(email || '').trim().toLowerCase();
+    }
+
+    function userRef(uid) {
+      return db.collection('users').doc(uid);
+    }
+
+    function closetCollection(uid) {
+      return db.collection('users').doc(uid).collection('closetItems');
+    }
+
+    function outfitsCollection(uid) {
+      return db.collection('users').doc(uid).collection('outfits');
+    }
+
+    function currentOutfitDoc(uid) {
+      return outfitsCollection(uid).doc('current');
+    }
+
+    function getCurrentProfileLabel() {
+      if (!activeProfile || !activeProfile.name) return 'MY CLOSET';
+      return `${activeProfile.name}'s closet`;
+    }
+
+    function updateBranding() {
+      const title = document.getElementById('logoTitle');
+      const sub = document.getElementById('logoSub');
+      if (!title || !sub) return;
+      title.textContent = getCurrentProfileLabel();
+      sub.textContent = activeProfile?.email ? activeProfile.email : 'sign in to sync your closet';
+    }
+
+    function loadItems() {
+      return [];
+    }
+
+    function saveItems() {}
 
     function saveOutfit() {
-      try {
-        const payload = Object.fromEntries(Object.entries(outfitSlots).map(([slot, item]) => [slot, item ? item.id : null]));
-        localStorage.setItem(OUTFIT_KEY, JSON.stringify(payload));
-      } catch (err) {}
+      if (!currentUser) return;
+      currentOutfitDoc(currentUser.uid).set({
+        top: outfitSlots.top ? outfitSlots.top.id : null,
+        bottom: outfitSlots.bottom ? outfitSlots.bottom.id : null,
+        outer: outfitSlots.outer ? outfitSlots.outer.id : null,
+        extra: outfitSlots.extra ? outfitSlots.extra.id : null,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
     }
 
-    function loadOutfit() {
-      try {
-        const raw = localStorage.getItem(OUTFIT_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== 'object') return;
-        outfitSlots = {
-          top: items.find(i => i.id === parsed.top) || null,
-          bottom: items.find(i => i.id === parsed.bottom) || null,
-          outer: items.find(i => i.id === parsed.outer) || null,
-          extra: items.find(i => i.id === parsed.extra) || null
-        };
-      } catch (err) {}
-    }
+    function loadOutfit() {}
 
     function normalizeCard(c) {
       return {
@@ -1521,6 +1755,7 @@
         loc: c.loc || 'wardrobe',
         color: c.color || '#f08cab',
         colorName: c.colorName || 'Rose',
+        tags: parseTags(c.tags || c.hashtags || c.tagList || c.tag || ''),
         emoji: c.emoji || '🩷',
         image: c.image || '',
         slot: c.slot || slotForCategory(c.cat || 'tops')
@@ -1554,7 +1789,7 @@
     }
 
     function labelForOcc(occ) {
-      return occ ? occ.charAt(0).toUpperCase() + occ.slice(1) : '';
+      return occasionLabel(occ);
     }
 
     function filteredItems() {
@@ -1564,13 +1799,13 @@
           if (currentCat !== 'all' && c.cat !== currentCat) return false;
           if (currentOcc && c.occ !== currentOcc) return false;
           if (currentLoc && c.loc !== currentLoc) return false;
-          if (currentSearch && !`${c.name} ${c.colorName} ${c.cat} ${c.occ}`.toLowerCase().includes(currentSearch.toLowerCase())) return false;
+          if (currentSearch && !`${c.name} ${c.colorName} ${c.cat} ${c.occ} ${(c.tags || []).join(' ')}`.toLowerCase().includes(currentSearch.toLowerCase())) return false;
           return true;
         })
         .sort((a, b) => {
           if (currentSort === 'color') return a.colorName.localeCompare(b.colorName);
           if (currentSort === 'occasion') return a.occ.localeCompare(b.occ);
-          return b.id - a.id;
+          return newestFirst(a, b);
         });
     }
 
@@ -1579,24 +1814,26 @@
       const photo = c.image
         ? `<img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" class="cloth-photo" />`
         : `<div class="cloth-fallback" aria-hidden="true"><span class="fallback-emoji">${c.emoji || emojiForCategory(c.cat)}</span></div>`;
+      const tags = (c.tags || []).slice(0, 4);
 
       return `
         <article class="cloth-card${inOutfit && forBuilder ? ' selected' : ''}" onclick="${forBuilder ? `pickForOutfit(${c.id})` : `cardClick(${c.id})`}">
-          <div class="cloth-media" style="background:${c.color}22">
+          <div class="cloth-media" style="background:${colorTint(c.color)}">
             ${photo}
             <span class="cloth-badge">${labelForOcc(c.occ)}</span>
           </div>
           <div class="cloth-info">
             <div class="cloth-name">${escapeHtml(c.name)}</div>
             <div class="cloth-sub">
-              <span class="color-dot" style="background:${c.color}"></span>
+              <span class="color-dot" style="background:${displayColor(c.color)}"></span>
               <span>${escapeHtml(c.colorName)}</span>
               <span>•</span>
               <span>${escapeHtml(c.loc)}</span>
             </div>
+            ${tags.length ? `<div class="tag-list">${tags.map(tag => `<span class="tag-pill">#${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
           </div>
           <div class="cloth-actions">
-            ${forBuilder ? `<button class="action-btn" onclick="event.stopPropagation(); pickForOutfit(${c.id})">${inOutfit ? 'Unpair' : 'Pair'}</button>` : `<button class="action-btn" onclick="event.stopPropagation(); pickForOutfit(${c.id})">Pair</button><button class="action-btn action-btn-danger" onclick="event.stopPropagation(); deleteItem(${c.id})">Delete</button>`}
+            ${forBuilder ? `<button class="action-btn" onclick="event.stopPropagation(); pickForOutfit(${c.id})">${inOutfit ? 'Unpair' : 'Pair'}</button>` : `<button class="action-btn action-btn-danger" onclick="event.stopPropagation(); deleteItem(${c.id})">Delete</button>`}
           </div>
         </article>
       `;
@@ -1611,7 +1848,7 @@
             <div class="empty-card">
               <div style="font-size:72px">🛍️</div>
               <h2>Your closet is empty</h2>
-              <p>Add your first photo piece to start building cute little outfit pairs.</p>
+              <p>Add your first photo piece to start building cute little looks.</p>
               <button class="btn-primary" onclick="openModal()">Add first piece</button>
             </div>
           </div>
@@ -1636,7 +1873,7 @@
         `;
         return;
       }
-      grid.innerHTML = items.map(normalizeCard).sort((a, b) => b.id - a.id).map(c => renderCard(c, true)).join('');
+      grid.innerHTML = items.map(normalizeCard).sort(newestFirst).map(c => renderCard(c, true)).join('');
     }
 
     function itemsForSlot(slot) {
@@ -1649,7 +1886,7 @@
       return items
         .map(normalizeCard)
         .filter(item => (allowed[slot] || []).includes(item.cat))
-        .sort((a, b) => b.id - a.id);
+        .sort(newestFirst);
     }
 
     function optionMarkup(list, placeholder) {
@@ -1737,7 +1974,7 @@
       el.className = 'stage-item';
       el.innerHTML = `
         <button class="stage-item-remove" onclick="removeSlot('${slot}')">×</button>
-        <div class="stage-item-img" style="background:${item.color}22">${photo}</div>
+        <div class="stage-item-img" style="background:${colorTint(item.color)}">${photo}</div>
         <div class="stage-item-name">${escapeHtml(item.name)}</div>
       `;
     }
@@ -1748,7 +1985,9 @@
       renderSlot('outer');
       renderSlot('extra');
       syncPairFormFromSlots();
-      saveOutfit();
+      if (!isFirestoreSyncing) {
+        saveOutfit();
+      }
     }
 
     function updateCounts() {
@@ -1767,7 +2006,11 @@
         casual: items.filter(i => i.occ === 'casual').length,
         formal: items.filter(i => i.occ === 'formal').length,
         party: items.filter(i => i.occ === 'party').length,
-        work: items.filter(i => i.occ === 'work').length
+        work: items.filter(i => i.occ === 'work').length,
+        wedding: items.filter(i => i.occ === 'wedding').length,
+        'event-formal': items.filter(i => i.occ === 'event-formal').length,
+        'shoot-day': items.filter(i => i.occ === 'shoot-day').length,
+        homewreck: items.filter(i => i.occ === 'homewreck').length
       };
 
       const locCounts = {
@@ -1777,17 +2020,17 @@
       };
 
       Object.entries(catCounts).forEach(([key, value]) => {
-        const el = document.getElementById(`cnt-${key}`);
+        const el = document.querySelector(`[data-count="${key}"]`);
         if (el) el.textContent = value;
       });
 
       Object.entries(occCounts).forEach(([key, value]) => {
-        const el = document.getElementById(`cnt-occ-${key}`);
+        const el = document.querySelector(`[data-count="occ-${key}"]`);
         if (el) el.textContent = value;
       });
 
       Object.entries(locCounts).forEach(([key, value]) => {
-        const el = document.getElementById(`cnt-loc-${key}`);
+        const el = document.querySelector(`[data-count="loc-${key}"]`);
         if (el) el.textContent = value;
       });
     }
@@ -1828,7 +2071,11 @@
         ['Casual', 'casual'],
         ['Formal', 'formal'],
         ['Party', 'party'],
-        ['Work', 'work']
+        ['Work', 'work'],
+        ['Wedding', 'wedding'],
+        ['Event formal', 'event-formal'],
+        ['Shoot day', 'shoot-day'],
+        ['Homewreck', 'homewreck']
       ];
 
       document.getElementById('statsCategories').innerHTML = categories.map(([label, key]) => {
@@ -1854,7 +2101,7 @@
       }).join('');
 
       document.getElementById('statsNote').textContent = total
-        ? 'Your closet is looking adorable. Keep adding photos to unlock more pairing possibilities.'
+        ? 'Your closet is looking adorable. Keep adding photos to unlock more outfit possibilities.'
         : 'Your closet is empty right now, which is honestly a very cute place to begin.';
     }
 
@@ -1871,7 +2118,201 @@
       return map[cat] || '#f08cab';
     }
 
+    function inferCategory(name) {
+      const text = String(name || '').toLowerCase();
+      if (/(dress|gown|saree|lehenga|kurta|one piece|one-piece)/.test(text)) return 'dresses';
+      if (/(jumpsuit|romper)/.test(text)) return 'jumpsuit';
+      if (/(coat|jacket|blazer|shacket|cardigan|hoodie|sweater|sweatshirt|outer|shrug)/.test(text)) return 'outerwear';
+      if (/(skirt|skorts)/.test(text)) return 'skirts';
+      if (/(pant|trouser|jean|denim|legging|cargo|short)/.test(text)) return 'pants';
+      if (/(tee|t-shirt|tshirt|shirt|top|blouse|camis|tank|crop)/.test(text)) return 'tops';
+      return 'tops';
+    }
+
+    function toggleMobileFilters() {
+      document.body.classList.toggle('mobile-filters-open');
+    }
+
+    function legacyItems() {
+      try {
+        const raw = localStorage.getItem(LEGACY_ITEMS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function legacyOutfit() {
+      try {
+        const raw = localStorage.getItem(LEGACY_OUTFIT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function legacyProfile() {
+      try {
+        const raw = localStorage.getItem(LEGACY_PROFILE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.email) return null;
+        return {
+          name: String(parsed.name || '').trim(),
+          email: normalizeEmail(parsed.email)
+        };
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function clearLegacyStorage() {
+      try {
+        localStorage.removeItem(LEGACY_ITEMS_KEY);
+        localStorage.removeItem(LEGACY_OUTFIT_KEY);
+        localStorage.removeItem(LEGACY_PROFILE_KEY);
+      } catch (err) {}
+    }
+
+    function hydrateUserProfile(userDoc, authUser) {
+      const data = userDoc && userDoc.exists ? userDoc.data() : {};
+      const name = String(data?.name || authUser?.displayName || '').trim();
+      const email = normalizeEmail(data?.email || authUser?.email || '');
+      activeProfile = { name, email };
+      updateBranding();
+    }
+
+    function syncOutfitSlotsFromIds() {
+      outfitSlots = {
+        top: outfitSlotIds.top ? items.find(i => String(i.id) === String(outfitSlotIds.top)) || null : null,
+        bottom: outfitSlotIds.bottom ? items.find(i => String(i.id) === String(outfitSlotIds.bottom)) || null : null,
+        outer: outfitSlotIds.outer ? items.find(i => String(i.id) === String(outfitSlotIds.outer)) || null : null,
+        extra: outfitSlotIds.extra ? items.find(i => String(i.id) === String(outfitSlotIds.extra)) || null : null
+      };
+    }
+
+    function stopUserListeners() {
+      if (unsubscribeCloset) unsubscribeCloset();
+      if (unsubscribeOutfit) unsubscribeOutfit();
+      unsubscribeCloset = null;
+      unsubscribeOutfit = null;
+    }
+
+    async function upsertUserDocument(user, name) {
+      const ref = userRef(user.uid);
+      const snap = await ref.get();
+      const existing = snap.exists ? snap.data() : {};
+      const payload = {
+        uid: user.uid,
+        name: name || existing?.name || user.displayName || '',
+        email: normalizeEmail(user.email),
+        lastLoginAt: serverTimestamp()
+      };
+
+      if (!snap.exists) {
+        payload.createdAt = serverTimestamp();
+      }
+
+      await ref.set(payload, { merge: true });
+
+      if (name && name !== user.displayName) {
+        await user.updateProfile({ displayName: name });
+      }
+
+      return ref.get();
+    }
+
+    async function maybeMigrateLegacyData(user) {
+      const localItems = legacyItems();
+      const localOutfit = legacyOutfit();
+      const legacyUser = legacyProfile();
+      const closetSnap = await closetCollection(user.uid).limit(1).get();
+      const outfitSnap = await outfitsCollection(user.uid).doc('current').get();
+      const hasRemoteItems = !closetSnap.empty;
+      const hasRemoteOutfit = outfitSnap.exists;
+
+      if (!hasRemoteItems && localItems.length) {
+        const batch = db.batch();
+        localItems.map(normalizeCard).forEach(item => {
+          const docId = String(item.id || Date.now());
+          batch.set(closetCollection(user.uid).doc(docId), {
+            ...item,
+            id: docId,
+            ownerUid: user.uid,
+            createdAt: item.createdAt || serverTimestamp(),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        });
+        await batch.commit();
+      }
+
+      if (!hasRemoteOutfit && localOutfit) {
+        const nextSlots = {
+          top: localItems.find(i => String(i.id) === String(localOutfit.top))?.id || null,
+          bottom: localItems.find(i => String(i.id) === String(localOutfit.bottom))?.id || null,
+          outer: localItems.find(i => String(i.id) === String(localOutfit.outer))?.id || null,
+          extra: localItems.find(i => String(i.id) === String(localOutfit.extra))?.id || null
+        };
+        await outfitsCollection(user.uid).doc('current').set({
+          ...nextSlots,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      if (!hasRemoteItems && localItems.length) {
+        clearLegacyStorage();
+      } else if (!hasRemoteItems && legacyUser && legacyUser.email === normalizeEmail(user.email)) {
+        clearLegacyStorage();
+      }
+    }
+
+    async function bindUserWorkspace(user) {
+      stopUserListeners();
+      currentUser = user;
+      const userDoc = await upsertUserDocument(user, user.displayName || legacyProfile()?.name || '');
+      hydrateUserProfile(userDoc, user);
+      await maybeMigrateLegacyData(user);
+
+      unsubscribeCloset = closetCollection(user.uid)
+        .orderBy('updatedAt', 'desc')
+        .onSnapshot(snapshot => {
+          isFirestoreSyncing = true;
+          try {
+            items = snapshot.docs.map(doc => normalizeCard({ id: doc.id, ...doc.data() }));
+            syncOutfitSlotsFromIds();
+            renderAll();
+          } finally {
+            isFirestoreSyncing = false;
+          }
+        });
+
+      unsubscribeOutfit = outfitsCollection(user.uid)
+        .doc('current')
+        .onSnapshot(snapshot => {
+          isFirestoreSyncing = true;
+          try {
+            const data = snapshot.exists ? snapshot.data() : null;
+            outfitSlotIds = {
+              top: data?.top || null,
+              bottom: data?.bottom || null,
+              outer: data?.outer || null,
+              extra: data?.extra || null
+            };
+            syncOutfitSlotsFromIds();
+            updateSlots();
+            renderAll();
+          } finally {
+            isFirestoreSyncing = false;
+          }
+        });
+    }
+
     function renderAll() {
+      updateBranding();
       updateCounts();
       renderGrid();
       renderBuilderGrid();
@@ -2024,11 +2465,82 @@
     }
 
     function openModal() {
+      if (!activeProfile?.email) {
+        openProfileModal();
+        return;
+      }
       document.getElementById('addModal').style.display = 'flex';
     }
 
     function closeModal() {
       document.getElementById('addModal').style.display = 'none';
+    }
+
+    function openProfileModal() {
+      const modal = document.getElementById('profileModal');
+      if (!modal) return;
+      document.getElementById('profileName').value = activeProfile?.name || '';
+      document.getElementById('profileEmail').value = activeProfile?.email || '';
+      document.getElementById('profilePassword').value = '';
+      modal.style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+      const modal = document.getElementById('profileModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function saveUserAndLogin(email, password, name, mode) {
+      await authPersistenceReady;
+      const cleanEmail = normalizeEmail(email);
+      const cleanName = String(name || '').trim();
+      if (!cleanEmail || !cleanEmail.includes('@')) {
+        alert('Please enter a valid email.');
+        return;
+      }
+      if (!password) {
+        alert('Please enter your password.');
+        return;
+      }
+      if (mode === 'signup' && !cleanName) {
+        alert('Please enter your name for signup.');
+        return;
+      }
+
+      try {
+        const credential = mode === 'signup'
+          ? await auth.createUserWithEmailAndPassword(cleanEmail, password)
+          : await auth.signInWithEmailAndPassword(cleanEmail, password);
+
+        const user = credential.user;
+        if (cleanName) {
+          await user.updateProfile({ displayName: cleanName });
+        }
+      } catch (err) {
+        alert(err?.message || 'Authentication failed.');
+      }
+    }
+
+    function signupUser() {
+      const name = document.getElementById('profileName').value;
+      const email = document.getElementById('profileEmail').value;
+      const password = document.getElementById('profilePassword').value;
+      saveUserAndLogin(email, password, name, 'signup');
+    }
+
+    function loginUser() {
+      const name = document.getElementById('profileName').value;
+      const email = document.getElementById('profileEmail').value;
+      const password = document.getElementById('profilePassword').value;
+      saveUserAndLogin(email, password, name, 'login');
+    }
+
+    async function logoutUser() {
+      try {
+        await auth.signOut();
+      } catch (err) {
+        alert(err?.message || 'Could not log out right now.');
+      }
     }
 
     function selectColor(el) {
@@ -2052,6 +2564,10 @@
     }
 
     function addItem() {
+      if (!currentUser) {
+        openProfileModal();
+        return;
+      }
       const name = document.getElementById('newName').value.trim();
       if (!name) {
         alert('Please enter a name for this piece.');
@@ -2064,29 +2580,41 @@
         return;
       }
 
-      const cat = document.getElementById('newCat').value;
+      const cat = inferCategory(name);
       const occ = document.getElementById('newOcc').value;
       const loc = document.getElementById('newLoc').value;
+      const tags = parseTags(document.getElementById('newTags').value);
 
       const newItem = {
-        id: Date.now(),
+        id: String(Date.now()),
         name,
         cat,
         occ,
         loc,
         color: selectedColor,
         colorName: selectedColorName,
+        tags,
         image,
         emoji: emojiForCategory(cat),
-        slot: slotForCategory(cat)
+        slot: slotForCategory(cat),
+        ownerUid: currentUser?.uid || null,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
       };
 
       items.unshift(newItem);
-      saveItems();
+      if (currentUser) {
+        closetCollection(currentUser.uid).doc(newItem.id).set({
+          ...newItem,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
       renderAll();
       closeModal();
 
       document.getElementById('newName').value = '';
+      document.getElementById('newTags').value = '';
       document.getElementById('fileInput').value = '';
       document.getElementById('photoPreview').style.display = 'none';
       document.getElementById('photoPreview').src = '';
@@ -2107,7 +2635,9 @@
       Object.keys(outfitSlots).forEach(slot => {
         if (outfitSlots[slot] && outfitSlots[slot].id === id) outfitSlots[slot] = null;
       });
-      saveItems();
+      if (currentUser) {
+        closetCollection(currentUser.uid).doc(String(id)).delete();
+      }
       updateSlots();
       renderAll();
     }
@@ -2124,8 +2654,26 @@
       if (first) first.classList.add('active');
     }
 
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        currentUser = user;
+        await bindUserWorkspace(user);
+        closeProfileModal();
+      } else {
+        stopUserListeners();
+        currentUser = null;
+        activeProfile = null;
+        items = [];
+        outfitSlotIds = { top: null, bottom: null, outer: null, extra: null };
+        outfitSlots = { top: null, bottom: null, outer: null, extra: null };
+        updateBranding();
+        renderAll();
+        openProfileModal();
+      }
+    });
+
     function init() {
-      loadOutfit();
+      updateBranding();
       restoreModalDefaults();
       renderAll();
       updateSlots();
