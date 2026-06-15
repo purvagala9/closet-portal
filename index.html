@@ -1162,6 +1162,34 @@
         cursor: default;
       }
     }
+    .btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-google:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.btn-google svg {
+  flex-shrink: 0;
+}
   </style>
 </head>
 <body>
@@ -1539,7 +1567,10 @@
 
   <div class="modal-overlay" id="profileModal">
     <div class="modal">
-      <div class="modal-title">Open your closet</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+  <div class="modal-title" style="margin-bottom:0">Open your closet</div>
+  <button onclick="closeProfileModal()" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:22px;line-height:1;padding:4px 8px;border-radius:8px;transition:background 0.15s ease" onmouseover="this.style.background='var(--accent-3)'" onmouseout="this.style.background='none'">✕</button>
+</div>
       <div class="form-row">
         <div class="form-label">Your name</div>
         <input class="form-input" type="text" id="profileName" placeholder="e.g. Snigdha" />
@@ -1555,12 +1586,25 @@
       <div class="form-row">
         <div class="tag-suggest">Your closet will sync to Firebase. Use the same email and password anywhere to bring everything back.</div>
       </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeProfileModal()">Not now</button>
-        <button class="btn-secondary" onclick="logoutUser()"><i class="ti ti-logout" aria-hidden="true"></i> Logout</button>
-        <button class="btn-secondary" onclick="loginUser()"><i class="ti ti-login" aria-hidden="true"></i> Log in</button>
-        <button class="btn-primary" onclick="signupUser()"><i class="ti ti-user-plus" aria-hidden="true"></i> Sign up</button>
-      </div>
+     <div class="modal-actions">
+  <button class="btn-secondary" onclick="logoutUser()"><i class="ti ti-logout" aria-hidden="true"></i> Logout</button>
+  <button class="btn-secondary" onclick="loginUser()"><i class="ti ti-login" aria-hidden="true"></i> Log in</button>
+  <button class="btn-primary" onclick="signupUser()"><i class="ti ti-user-plus" aria-hidden="true"></i> Sign up</button>
+</div>
+<div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+  <div style="flex:1;height:1px;background:var(--border)"></div>
+  <span style="font-size:13px;color:var(--text-2)">or</span>
+  <div style="flex:1;height:1px;background:var(--border)"></div>
+</div>
+<button class="btn-google" onclick="loginWithGoogle()">
+  <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+    <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+    <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+  </svg>
+  Continue with Google
+</button>
     </div>
   </div>
 
@@ -2471,14 +2515,9 @@
   }
   document.getElementById('addModal').style.display = 'flex';
 }
-
-    function closeModal() {
-      function closeProfileModal() {
-  const modal = document.getElementById('profileModal');
-  if (modal) modal.style.display = 'none';
+function closeModal() {
+  document.getElementById('addModal').style.display = 'none';
 }
-      document.getElementById('addModal').style.display = 'none';
-    }
 
     function openProfileModal() {
       const modal = document.getElementById('profileModal');
@@ -2675,7 +2714,14 @@
         openProfileModal();
       }
     });
-
+async function loginWithGoogle() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch (err) {
+    alert(err?.message || 'Google sign-in failed.');
+  }
+}
     function init() {
       updateBranding();
       restoreModalDefaults();
