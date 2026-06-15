@@ -158,6 +158,10 @@
       box-shadow: 0 10px 20px rgba(125, 24, 24, 0.22);
     }
 
+    .is-hidden {
+      display: none !important;
+    }
+
     .btn-add:hover,
     .btn-primary:hover,
     .btn-secondary:hover,
@@ -1094,6 +1098,10 @@
         justify-content: center;
       }
 
+      .main {
+        margin-top: 2px;
+      }
+
       .hero {
         flex-direction: column;
         align-items: stretch;
@@ -1213,11 +1221,11 @@
 
     <div class="hero">
       <div class="hero-copy">
-        <div class="eyebrow">pookie girlie closet</div>
+        <div class="eyebrow">Your own personalised closet</div>
         <h1>Shop your own clothes like the cutest boutique on the internet</h1>
         <p>Start with a blank closet, upload your pieces, tag them with cute hashtags, and keep the whole wardrobe feeling dreamy, organized, and easy to browse.</p>
       </div>
-      <button class="btn-primary" onclick="openModal()">Add your first piece</button>
+      <button class="btn-primary" id="heroAddButton" onclick="openModal()">Add your first piece</button>
     </div>
 
     <div class="main">
@@ -1260,6 +1268,14 @@
             <span class="cat-item-left"><i class="ti ti-wind" aria-hidden="true"></i>Outerwear</span>
             <span class="cat-count" id="cnt-outerwear" data-count="outerwear">0</span>
           </button>
+          <button class="cat-item" onclick="filterCat('ethnic wear', this)">
+  <span class="cat-item-left"><i class="ti ti-stars" aria-hidden="true"></i>Ethnic wear</span>
+  <span class="cat-count" id="cnt-ethnic-wear" data-count="ethnic wear">0</span>
+</button>
+<button class="cat-item" onclick="filterCat('co-ord set', this)">
+  <span class="cat-item-left"><i class="ti ti-layout-columns" aria-hidden="true"></i>Co-ord set</span>
+  <span class="cat-count" id="cnt-coord-set" data-count="co-ord set">0</span>
+</button>
         </div>
 
         <div class="sidebar-section">
@@ -1339,7 +1355,7 @@
                   <h2>Pair your pieces</h2>
                   <p>Tap a piece to add it to your outfit board and build the cutest matchups.</p>
                 </div>
-                <button class="btn-chip" onclick="clearOutfit()"><i class="ti ti-refresh" aria-hidden="true"></i> Clear board</button>
+                <button class="btn-chip" onclick="deleteOutfit()"><i class="ti ti-trash" aria-hidden="true"></i> Delete outfit</button>
               </div>
               <div class="clothes-grid" id="builderGrid"></div>
             </div>
@@ -1485,14 +1501,14 @@
 
       <div class="form-row">
         <div class="form-label">Name</div>
-        <input class="form-input" type="text" id="newName" placeholder="e.g. pink satin blouse" />
+        <input class="form-input" type="text" id="newName" placeholder="e.g. pink satin blouse" autocomplete="off"/>
       </div>
 
       <div class="form-grid">
         <div class="form-row">
           <div class="form-label">Hashtags</div>
           <div class="tag-input-wrap">
-            <input class="tag-input" type="text" id="newTags" placeholder="e.g. dinnerdate, sundaybrunch, gymwear" />
+            <input class="tag-input" type="text" id="newTags" placeholder="e.g. dinnerdate, sundaybrunch, gymwear" autocomplete="off"/>
             <div class="tag-suggest">Add your own hashtags, separated by commas. Examples: dinnerdate, sundaybrunch, gymwear, hightea, summerfit, haldi, finedine, trekking, run.</div>
           </div>
         </div>
@@ -1814,7 +1830,9 @@
         skirts: 'bottom',
         outerwear: 'outer',
         jumpsuit: 'extra',
-        dresses: 'extra'
+        dresses: 'extra',
+        'ethnic wear': 'extra',
+'co-ord set': 'extra'
       };
       return slotMap[cat] || 'extra';
     }
@@ -1861,7 +1879,7 @@
       const tags = (c.tags || []).slice(0, 4);
 
       return `
-        <article class="cloth-card${inOutfit && forBuilder ? ' selected' : ''}" onclick="${forBuilder ? `pickForOutfit(${c.id})` : `cardClick(${c.id})`}">
+      <article class="cloth-card${inOutfit && forBuilder ? ' selected' : ''}" onclick="${forBuilder ? `pickForOutfit('${String(c.id)}')` : `cardClick('${String(c.id)}')`}">
           <div class="cloth-media" style="background:${colorTint(c.color)}">
             ${photo}
             <span class="cloth-badge">${labelForOcc(c.occ)}</span>
@@ -1877,7 +1895,7 @@
             ${tags.length ? `<div class="tag-list">${tags.map(tag => `<span class="tag-pill">#${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
           </div>
           <div class="cloth-actions">
-            ${forBuilder ? `<button class="action-btn" onclick="event.stopPropagation(); pickForOutfit(${c.id})">${inOutfit ? 'Unpair' : 'Pair'}</button>` : `<button class="action-btn action-btn-danger" onclick="event.stopPropagation(); deleteItem(${c.id})">Delete</button>`}
+            ${forBuilder ? `<button class="action-btn" onclick="event.stopPropagation(); pickForOutfit('${String(c.id)}')">${inOutfit ? 'Unpair' : 'Pair'}</button>` : `<button class="action-btn action-btn-danger" onclick="event.stopPropagation(); deleteItem('${String(c.id).replace(/'/g, '')}')">Delete</button>`}
           </div>
         </article>
       `;
@@ -1925,7 +1943,7 @@
         top: ['tops', 'tshirts'],
         bottom: ['pants', 'skirts'],
         outer: ['outerwear'],
-        extra: ['dresses', 'jumpsuit']
+      extra: ['dresses', 'jumpsuit', 'ethnic wear', 'co-ord set']
       };
       return items
         .map(normalizeCard)
@@ -2043,7 +2061,9 @@
         skirts: items.filter(i => i.cat === 'skirts').length,
         dresses: items.filter(i => i.cat === 'dresses').length,
         jumpsuit: items.filter(i => i.cat === 'jumpsuit').length,
-        outerwear: items.filter(i => i.cat === 'outerwear').length
+        outerwear: items.filter(i => i.cat === 'outerwear').length,
+       'ethnic wear': items.filter(i => i.cat === 'ethnic wear').length,
+       'co-ord set': items.filter(i => i.cat === 'co-ord set').length
       };
 
       const occCounts = {
@@ -2108,7 +2128,8 @@
         ['Skirts', 'skirts'],
         ['Dresses', 'dresses'],
         ['Jumpsuit', 'jumpsuit'],
-        ['Outerwear', 'outerwear']
+        ['Outerwear', 'outerwear'],['Ethnic wear', 'ethnic wear'],
+['Co-ord set', 'co-ord set']
       ];
 
       const occasions = [
@@ -2157,17 +2178,21 @@
         skirts: '#d6c3ff',
         dresses: '#f08cab',
         jumpsuit: '#b8e3d0',
-        outerwear: '#b6c9ff'
+        outerwear: '#b6c9ff',
+        'ethnic wear': '#f9c5d1',
+'co-ord set': '#d6c3ff'
       };
       return map[cat] || '#f08cab';
     }
 
     function inferCategory(name) {
       const text = String(name || '').toLowerCase();
-      if (/(dress|gown|saree|lehenga|kurta|one piece|one-piece)/.test(text)) return 'dresses';
+      if (/(dress|gown|one piece|one-piece)/.test(text)) return 'dresses';
+      if (/(saree|lehenga|kurta|salwar-suit|salwar kameez|salwar suit|anarkali|sharara|gharara|ghagra|wedding)/.test(text)) return 'ethnic wear';
       if (/(jumpsuit|romper)/.test(text)) return 'jumpsuit';
       if (/(coat|jacket|blazer|shacket|cardigan|hoodie|sweater|sweatshirt|outer|shrug)/.test(text)) return 'outerwear';
       if (/(skirt|skorts)/.test(text)) return 'skirts';
+      if (/(co-ord|coord|sets)/.test(text)) return 'co-ord set';
       if (/(pant|trouser|jean|denim|legging|cargo|short)/.test(text)) return 'pants';
       if (/(tee|t-shirt|tshirt|shirt|top|blouse|camis|tank|crop)/.test(text)) return 'tops';
       return 'tops';
@@ -2357,12 +2382,19 @@
 
     function renderAll() {
       updateBranding();
+      updateHeroCta();
       updateCounts();
       renderGrid();
       renderBuilderGrid();
       renderPairFormOptions();
       updateSlots();
       renderStats();
+    }
+
+    function updateHeroCta() {
+      const heroButton = document.getElementById('heroAddButton');
+      if (!heroButton) return;
+      heroButton.classList.toggle('is-hidden', items.length > 0);
     }
 
     function switchView(v, el) {
@@ -2419,15 +2451,17 @@
     }
 
     function cardClick(id) {
-      const item = items.find(i => i.id === id);
+      const normalizedId = String(id);
+      const item = items.find(i => String(i.id) === normalizedId);
       if (!item) return;
       sendPrompt(`Tell me cute outfit ideas for my ${item.name} in ${item.colorName}.`);
     }
 
     function pickForOutfit(id) {
-      const item = items.find(i => i.id === id);
+      const normalizedId = String(id);
+      const item = items.find(i => String(i.id) === normalizedId);
       if (!item) return;
-      const already = Object.entries(outfitSlots).find(([slot, value]) => value && value.id === id);
+      const already = Object.entries(outfitSlots).find(([, value]) => value && String(value.id) === normalizedId);
       if (already) {
         outfitSlots[already[0]] = null;
         updateSlots();
@@ -2479,6 +2513,12 @@
       updateSlots();
       renderBuilderGrid();
       document.getElementById('aiVerdict').style.display = 'none';
+    }
+
+    function deleteOutfit() {
+      const ok = confirm('Delete this outfit?');
+      if (!ok) return;
+      clearOutfit();
     }
 
     function analyzeOutfit() {
@@ -2593,19 +2633,30 @@ function closeModal() {
       selectedColorName = el.dataset.name;
     }
 
-    function previewPhoto(e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        uploadedImage = ev.target.result;
-        const img = document.getElementById('photoPreview');
-        img.src = uploadedImage;
-        img.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-
+  function previewPhoto(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      uploadedImage = canvas.toDataURL('image/jpeg', 0.7);
+      const preview = document.getElementById('photoPreview');
+      preview.src = uploadedImage;
+      preview.style.display = 'block';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
     function addItem() {
       if (!currentUser) {
         openProfileModal();
@@ -2640,6 +2691,7 @@ function closeModal() {
         image,
         emoji: emojiForCategory(cat),
         slot: slotForCategory(cat),
+      
         ownerUid: currentUser?.uid || null,
         createdAt: Date.now(),
         updatedAt: Date.now()
@@ -2667,19 +2719,30 @@ function closeModal() {
       if (first) first.classList.add('active');
       selectedColor = first.dataset.col;
       selectedColorName = first.dataset.name;
+      if (currentUser) {
+  closetCollection(currentUser.uid).doc(newItem.id).set({
+    ...newItem,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true }).catch(err => {
+    console.error('Save failed:', err);
+    alert('Could not save this piece: ' + (err.message || 'unknown error'));
+  });
+}
     }
 
     function deleteItem(id) {
-      const item = items.find(i => i.id === id);
+      const normalizedId = String(id);
+      const item = items.find(i => String(i.id) === normalizedId);
       if (!item) return;
       const ok = confirm(`Delete "${item.name}" from your closet?`);
       if (!ok) return;
-      items = items.filter(i => i.id !== id);
+      items = items.filter(i => String(i.id) !== normalizedId);
       Object.keys(outfitSlots).forEach(slot => {
-        if (outfitSlots[slot] && outfitSlots[slot].id === id) outfitSlots[slot] = null;
+        if (outfitSlots[slot] && String(outfitSlots[slot].id) === normalizedId) outfitSlots[slot] = null;
       });
       if (currentUser) {
-        closetCollection(currentUser.uid).doc(String(id)).delete();
+        closetCollection(currentUser.uid).doc(normalizedId).delete();
       }
       updateSlots();
       renderAll();
