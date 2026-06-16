@@ -1628,14 +1628,15 @@
    <script src="firebase-config.js"></script>
 
 <script>
-firebase.initializeApp(firebaseConfig);
+  const config = await fetch('/api/firebase-config')
+  .then(r => r.json());
+
+firebase.initializeApp(config);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
-const authPersistenceReady =
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-</script><script>
+const authPersistenceReady =auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     const LEGACY_PROFILE_KEY = 'closet-portal-profile-v1';
     const LEGACY_ITEMS_KEY = 'closet-portal-items-v2';
     const LEGACY_OUTFIT_KEY = 'closet-portal-outfit-v2';
