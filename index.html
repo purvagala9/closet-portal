@@ -1623,20 +1623,40 @@
 </button>
     </div>
   </div>
-
-
-   <script src="firebase-config.js"></script>
-
 <script>
-  const config = await fetch('/api/firebase-config')
-  .then(r => r.json());
+  let auth, db, serverTimestamp, authPersistenceReady;
 
-firebase.initializeApp(config);
+async function initFirebase() {
+  const config = await fetch('/api/firebase-config').then(r => r.json());
+  firebase.initializeApp(config);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
+  authPersistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
-const authPersistenceReady =auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      currentUser = user;
+      await bindUserWorkspace(user);
+      closeProfileModal();
+    } else {
+      stopUserListeners();
+      currentUser = null;
+      activeProfile = null;
+      items = [];
+      outfitSlotIds = { top: null, bottom: null, outer: null, extra: null };
+      outfitSlots = { top: null, bottom: null, outer: null, extra: null };
+      updateBranding();
+      renderAll();
+      openProfileModal();
+    }
+  });
+}
+
+initFirebase().catch(err => {
+  console.error('Firebase init failed:', err);
+  alert('Could not load app config. Check your API route and .env file.');
+});
     const LEGACY_PROFILE_KEY = 'closet-portal-profile-v1';
     const LEGACY_ITEMS_KEY = 'closet-portal-items-v2';
     const LEGACY_OUTFIT_KEY = 'closet-portal-outfit-v2';
@@ -2756,23 +2776,6 @@ function closeModal() {
       if (first) first.classList.add('active');
     }
 
-    auth.onAuthStateChanged(async user => {
-      if (user) {
-        currentUser = user;
-        await bindUserWorkspace(user);
-        closeProfileModal();
-      } else {
-        stopUserListeners();
-        currentUser = null;
-        activeProfile = null;
-        items = [];
-        outfitSlotIds = { top: null, bottom: null, outer: null, extra: null };
-        outfitSlots = { top: null, bottom: null, outer: null, extra: null };
-        updateBranding();
-        renderAll();
-        openProfileModal();
-      }
-    });
 async function loginWithGoogle() {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
