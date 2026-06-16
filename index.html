@@ -1624,23 +1624,18 @@
     </div>
   </div>
 
-  <script>
-   const firebaseConfig = {
-  apiKey: "AIzaSyAN6kFy1aDv4fawNb3m3Ey25YyXG2KWsxw",
-  authDomain: "closet-portal.firebaseapp.com",
-  projectId: "closet-portal",
-  storageBucket: "closet-portal.firebasestorage.app",
-  messagingSenderId: "11252594326",
-  appId: "1:11252594326:web:019ccb64ff7a411cfd34b7",
-  measurementId: "G-F65KDKWDGJ"
-};
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
-    const authPersistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+   <script src="firebase-config.js"></script>
 
+<script>
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
+const authPersistenceReady =
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+</script><script>
     const LEGACY_PROFILE_KEY = 'closet-portal-profile-v1';
     const LEGACY_ITEMS_KEY = 'closet-portal-items-v2';
     const LEGACY_OUTFIT_KEY = 'closet-portal-outfit-v2';
